@@ -1,0 +1,53 @@
+<!--This file controls the display/getting data of the build step.-->
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <f:entry title="Runscript Location" field="commandLine" help="/plugin/eggPlant/help-instance.html">
+    <f:textbox name="commandLine" value="${instance.commandLine}" default="C:\Program Files\Eggplant\runscript.bat" />
+  </f:entry>
+  
+  <f:entry title="Script" field="script" help="/plugin/eggPlant/help-script.html">
+    <f:textbox name="script" value="${instance.script}" />
+  </f:entry>
+  
+  <f:entry title="SUT" field="SUT" help="/plugin/eggPlant/help-sut.html">
+    <f:textbox name="SUT" value="${instance.SUT}" />
+  </f:entry>
+  
+  <f:entry title="Port" field="port" help="/plugin/eggPlant/help-port.html">
+    <f:textbox name="port" value="${instance.port}" default="5900" />
+  </f:entry>
+  
+  <f:entry title="Password" field="password" help="/plugin/eggPlant/help-password.html">
+    <f:textbox name="password" value="${instance.password}" />
+  </f:entry>
+  
+  <!--advanced options-->
+      <f:advanced>
+        <f:section title="Advanced eggPlant Settings">
+          <f:entry title="Script Parameters" field="params" help="/plugin/eggPlant/help-scriptparams.html">
+            <f:textbox name="params" value="${instance.params}" />
+          </f:entry>
+
+          <f:entry title="Color Depth" field="colorDepth" help="/plugin/eggPlant/help-colordepth.html">
+            <f:textbox name="colorDepth" value="${instance.colorDepth}" />
+          </f:entry>
+
+          <f:entry title="Global Results Folder" field="globalResultsFolder" help="/plugin/eggPlant/help-globalResults.html">
+            <f:textbox name="globalResultsFolder" value="${instance.globalResultsFolder}" />
+          </f:entry>
+
+          <f:entry title="Default Document Directory" field="defaultDocumentDirectory" help="/plugin/eggPlant/help-defaultDocumentDirectory.html">
+            <f:textbox name="defaultDocumentDirectory" value="${instance.defaultDocumentDirectory}" />
+          </f:entry>
+
+          <f:entry title="Report Failures" field="reportFailures" help="/plugin/eggPlant/help-reportfailures.html">
+            <f:checkbox name="reportFailures" value="${instance.reportFailures}" default="true"/>
+          </f:entry>
+
+          <f:entry title="Console Output" field="commandLineOutput" help="/plugin/eggPlant/help-consoleOutput.html">
+            <f:checkbox name="commandLineOutput" value="${instance.commandLineOutput}" />
+          </f:entry>
+        </f:section>
+       </f:advanced>
+       
+</j:jelly>

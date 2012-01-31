@@ -1,0 +1,78 @@
+<!--This file controls the display of the results.-->
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+  xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+  <l:layout>
+    <st:include it="${it.build}" page="sidepanel.jelly"/>
+    <l:main-panel>
+      <h1>eggPlant Results</h1>
+
+      <j:forEach var="result" items="${it.resultList}">
+        <table class="pane" >
+          <tr>
+            <td class="pane-header">Outcome</td>
+            <td class="pane">
+              <j:if test="${result.passed}">
+                <span class="result-passed">Passed</span>
+              </j:if>
+              <j:if test="${!result.passed}">
+                <span class="result-failed">Failed</span>
+              </j:if>
+            </td>
+          </tr>
+          <tr>
+            <td class="pane-header">Initial SUT</td>
+            <td class="pane">${result.sut}</td>
+          </tr>
+          <tr>
+            <td class="pane-header">Script</td>
+            <td class="pane">${result.script}</td>
+          </tr>
+          <tr>
+            <td class="pane-header">Run Time</td>
+            <td class="pane">${result.runDate}</td>
+          </tr>
+          <tr>
+            <td class="pane-header">Duration</td>
+            <td class="pane">${result.duration}</td>
+          </tr>
+          <tr>
+            <td class="pane-header">Errors</td>
+            <td class="pane">${result.errors}</td>
+          </tr>
+          <tr>
+            <td class="pane-header">Warnings</td>
+            <td class="pane">${result.warnings}</td>
+          </tr>
+          <tr>
+            <td class="pane-header">Exceptions</td>
+            <td class="pane">${result.exceptions}</td>
+          </tr>
+        </table>
+
+        <table class="pane">
+          <tr>
+            <td class="pane-header">Step</td>
+            <td class="pane-header">Time</td>
+            <td class="pane-header">Message</td>
+            <td class="pane-header">Image</td>
+            <td class="pane-header">Text</td>
+          </tr>
+          <j:forEach var="scriptline" items="${result.scriptLines}">
+            <tr>
+              <td class="pane">${scriptline.step}</td>
+              <td class="pane">${scriptline.time}</td>
+              <td class="pane">${scriptline.message}</td>
+              <td class="pane"><a href="${scriptline.imageURL}">${scriptline.image}</a></td>
+              <td class="pane">${scriptline.text}</td>
+            </tr>
+          </j:forEach>
+        </table>
+        <br/>
+      </j:forEach>
+
+    </l:main-panel>
+  </l:layout>
+
+</j:jelly>
