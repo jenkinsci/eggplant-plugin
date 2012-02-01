@@ -51,12 +51,13 @@ public class RunscriptCommand {
     }
     
     public void buildRunscriptCommandString(){
-        if (port != 0) runscriptCommandString += " -port "+port;
-        if (password != null) runscriptCommandString += " -password "+password;
-        if (colorDepth != 0) runscriptCommandString += " -colordepth "+colorDepth;
-        if (repeatCount != 0) runscriptCommandString += " -repeat "+repeatCount;
-        if (globalResultsFolder != null) runscriptCommandString += " -GlobalResultsFolder "+globalResultsFolder;
-        if (defaultDocumentDirectory != null) runscriptCommandString += " -DefaultDocumentDirectory "+defaultDocumentDirectory;
+        if (host != null) runscriptCommandString += " -host " + host;
+        if (port != 0) runscriptCommandString += " -port " + port;
+        if (password != null) runscriptCommandString += " -password " + password;
+        if (colorDepth != 0) runscriptCommandString += " -colordepth " + colorDepth;
+        if (repeatCount != 0) runscriptCommandString += " -repeat " + repeatCount;
+        if (globalResultsFolder != null) runscriptCommandString += " -GlobalResultsFolder " + globalResultsFolder;
+        if (defaultDocumentDirectory != null) runscriptCommandString += " -DefaultDocumentDirectory " + defaultDocumentDirectory;
         if (commandLineOutput == true) runscriptCommandString += " -CommandLineOutput YES ";
         if (reportFailures == true) runscriptCommandString += " -ReportFailures YES ";
         
