@@ -7,7 +7,7 @@
   </parent>
 
   <artifactId>eggplant-plugin</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>Jenkins eggPlant plugin</name>
   <description>Integrates Jenkins eith eggPlant GUI Test Tool</description>
