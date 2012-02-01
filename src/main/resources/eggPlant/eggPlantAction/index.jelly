@@ -64,7 +64,8 @@
               <td class="pane">${scriptline.step}</td>
               <td class="pane">${scriptline.time}</td>
               <td class="pane">${scriptline.message}</td>
-              <td class="pane"><a href="${scriptline.imageURL}">${scriptline.image}</a></td>
+<!--          <td class="pane"><a href="${scriptline.imageURL}">${scriptline.image}</a></td>  -->
+              <td class="pane">${scriptline.image}</td>
               <td class="pane">${scriptline.text}</td>
             </tr>
           </j:forEach>

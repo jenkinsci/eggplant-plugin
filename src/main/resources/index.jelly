@@ -1,6 +1,4 @@
-<!--
-  This view is used to render the installed plugins page.
--->
+<!-- This view is used to render the installed plugins page. -->
 <div>
-  This plugin is for running eggPlant scripts in a Continuous Integration environment.
+  Allows easy configuration to run eggPlant scripts and view results in Jenkins.
 </div>
