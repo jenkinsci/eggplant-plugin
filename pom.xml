@@ -10,7 +10,7 @@
   <version>1.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>Jenkins eggPlant plugin</name>
-  <description>Integrates Jenkins eith eggPlant GUI Test Tool</description>
+  <description>Integrates Jenkins with eggPlant GUI Test Tool</description>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/eggplant-plugin</url>
 
   <scm>
@@ -50,6 +50,15 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.4.3</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
         </plugins>
@@ -79,4 +88,7 @@
             <version>2.0.5</version>
         </dependency>
     </dependencies>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 </project>
