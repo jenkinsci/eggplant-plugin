@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.424</version><!-- which version of Jenkins is this plugin built against? -->
+    <version>1.427</version><!-- which version of Jenkins is this plugin built against? -->
   </parent>
 
   <artifactId>eggplant-plugin</artifactId>
@@ -31,6 +31,11 @@
       <id>jonathanosx</id>
       <name>Jonathan Gillaspie</name>
       <email>jonathan.gillaspie@testplant.com</email>
+    </developer>
+    <developer>
+      <id>allen_fisher</id>
+      <name>Allen Fisher</name>
+      <email>allen.fisher@gmail.com</email>
     </developer>
   </developers>
 
