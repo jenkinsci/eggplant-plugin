@@ -18,8 +18,8 @@
       is mapped to our webapp/ directory, so this is a convenient way to serve
       static resources.
     -->
-        <f:entry title="eggPlant instance" field="ep_instance" help="/plugin/eggPlant/help-instance.html">
-            <f:textbox name="epInstance" value="${descriptor.epInstance}" />
+        <f:entry title="Runscript Location" field="ep_instance" help="/plugin/eggPlant/help-instance.html">
+            <f:textbox name="commandLine" value="${descriptor.commandLine}" />
         </f:entry>
     </f:section>
 </j:jelly>

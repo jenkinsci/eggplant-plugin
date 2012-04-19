@@ -19,26 +19,10 @@ import java.io.File;
 import javax.servlet.ServletException;
 import java.io.IOException;
 
-/**
- * Sample {@link Builder}.
- *
- * <p>
- * When the user configures the project and enables this builder,
- * {@link DescriptorImpl#newcommandLine(StaplerRequest)} is invoked
- * and a new {@link eggPlantBuilder} is created. The created
- * commandLine is persisted to the project configuration XML by using
- * XStream, so this allows you to use commandLine fields (like {@link #name})
- * to remember the configuration.
- *
- * <p>
- * When a build is performed, the {@link #perform(AbstractBuild, Launcher, BuildListener)}
- * method will be invoked. 
- *
- * @author Kohsuke Kawaguchi
- */
+
 public class eggPlantBuilder extends Builder {
 
-    private final String commandLine;
+    
     private final String script;
     private final String sut;
     private final String port;
@@ -54,12 +38,12 @@ public class eggPlantBuilder extends Builder {
     //operating system... it appears that Jenkins on Mac/Linux doesn't like quotes in the command
     private String operatingSystem;
     private String[] scripts; 
+    private String commandLine; //location of runscript
 
     
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public eggPlantBuilder(String commandLine,
-                           String script,
+    public eggPlantBuilder(String script,
                            String SUT,
                            String port, 
                            String password, 
@@ -70,7 +54,6 @@ public class eggPlantBuilder extends Builder {
                            boolean reportFailures,
                            boolean commandLineOutput) {
         
-        this.commandLine = commandLine;
         this.script = script;
         this.sut = SUT;
         this.port = port;
@@ -97,6 +80,7 @@ public class eggPlantBuilder extends Builder {
             return "/usr/local/bin/runscript";
         }
     }
+    
     public String getCommandLine() {
         return commandLine;
     }
@@ -162,9 +146,15 @@ public class eggPlantBuilder extends Builder {
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
         //  Start logging - this will appear in the console output
         listener.getLogger().println("eggPlant execution started");
-
+        
+        //ajf 04/18/2012: pull runscript from the global store or use the default.
+        
+        if (getDescriptor().getCommandLine().isEmpty() || getDescriptor().getCommandLine() == null ){
+            this.commandLine = defaultCLI();
+        } else {
+                    this.commandLine = getDescriptor().getCommandLine();
+        }
         String epWorkingDir;
-        String workspacedir;
         String ls_str;
         
         //ajf 10/21/11: rewrote in a more systemmatic fashion to fix 20016287
@@ -172,7 +162,7 @@ public class eggPlantBuilder extends Builder {
         String assetsDir; //directory where eggPlant scripts exist
 
         try {
-                       
+             
             //Construct the command line execution
             RunscriptCommand runner = new RunscriptCommand(build,commandLine,script);
             
@@ -285,19 +275,15 @@ public class eggPlantBuilder extends Builder {
     }
     
     /**
-     * This bit is for the global settings of Jenkins
-     * It allows global settings for eggPlant
-     * TODO: Does not work
-     */
-
-    /**
      * Descriptor for {@link eggPlantBuilder}. Used as a singleton.
      * The class is marked as public so that it can be accessed from views.
-     *
-     * <p>
-     * See <tt>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</tt>
-     * for the actual HTML fragment for the configuration screen.
      */
+    
+    @Override
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl) super.getDescriptor();
+    }
+    
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
@@ -308,8 +294,8 @@ public class eggPlantBuilder extends Builder {
          * <p>
          * If you don't want fields to be persisted, use <tt>transient</tt>.
          */
-        private String _commandLine;
-
+        private String commandLine;
+      
         /**
          * Performs on-the-fly validation of the form field 'name'.
          *
@@ -318,14 +304,12 @@ public class eggPlantBuilder extends Builder {
          * @return
          *      Indicates the outcome of the validation. This is sent to the browser.
          */
-        public FormValidation doCheckName(@QueryParameter String value)
+        public FormValidation doCheckCommandLine(@QueryParameter String value)
                 throws IOException, ServletException {
             if (value.length() == 0) {
-                return FormValidation.error("Please set a name");
+                return FormValidation.error("Please set the location of runscript");
             }
-            if (value.length() < 4) {
-                return FormValidation.warning("Isn't the name too short?");
-            }
+            
             return FormValidation.ok();
         }
         @Override
@@ -334,27 +318,27 @@ public class eggPlantBuilder extends Builder {
             return true;
         }
 
-        /**
-         * This human readable name is used in the configuration screen.
-         */
+ 
         @Override
         public String getDisplayName() {
-            return "eggPlant Test";
+            return "eggPlant Configuration";
         }
 
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             // To persist global configuration information,
             // set that to properties and call save().
-            _commandLine = formData.getString("epcommandLine");
-            // ^Can also use req.bindJSON(this, formData);
-            //  (easier when there are many fields; need set* methods for this, like setUseFrench)
+            commandLine = formData.getString("commandLine");
             save();
             return super.configure(req, formData);
         }
+        
+        public String getCommandLine(){
+            return commandLine;
+        }
 
-        public String epcommandLine() {
-            return _commandLine;
+        public String commandLine() {
+            return commandLine;
         }
     }
 }

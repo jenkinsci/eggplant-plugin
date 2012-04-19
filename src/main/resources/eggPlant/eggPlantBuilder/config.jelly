@@ -1,9 +1,6 @@
 <!--This file controls the display/getting data of the build step.-->
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:entry title="Runscript Location" field="commandLine" help="/plugin/eggPlant/help-instance.html">
-    <f:textbox name="commandLine" value="${instance.commandLine}" default="C:\Program Files\Eggplant\runscript.bat" />
-  </f:entry>
   
   <f:entry title="Script" field="script" help="/plugin/eggPlant/help-script.html">
     <f:textbox name="script" value="${instance.script}" />
