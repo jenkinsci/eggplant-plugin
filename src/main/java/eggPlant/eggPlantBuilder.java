@@ -75,7 +75,7 @@ public class eggPlantBuilder extends Builder {
         if (operatingSystem.startsWith("Windows")) {
             return "C:\\Program Files\\Eggplant\\runscript.bat";
         } else if (operatingSystem.startsWith("Mac")) {
-            return "/Applications/Eggplant/runscript";
+            return "/Applications/Eggplant.app/runscript";
         } else {
             return "/usr/local/bin/runscript";
         }
@@ -149,7 +149,7 @@ public class eggPlantBuilder extends Builder {
         
         //ajf 04/18/2012: pull runscript from the global store or use the default.
         
-        if (getDescriptor().getCommandLine().isEmpty() || getDescriptor().getCommandLine() == null ){
+        if (getDescriptor().getCommandLine() == null || getDescriptor().getCommandLine().isEmpty() ){
             this.commandLine = defaultCLI();
         } else {
                     this.commandLine = getDescriptor().getCommandLine();
