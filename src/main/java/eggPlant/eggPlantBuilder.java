@@ -269,12 +269,11 @@ public class eggPlantBuilder extends Builder {
         }
 
         EggplantParser parser = new EggplantParser();
-        scripts = script.split(",");
 
         //  Get the files in the build job directory
         File[] files = build.getRootDir().listFiles();
         boolean passed = true;
-        int j = 0;//script counter
+
         //  Loop round all the files
         for (int i = 0; i < files.length; i++)
         {
@@ -287,8 +286,11 @@ public class eggPlantBuilder extends Builder {
                 //  then nothing will be logged
                 String startDir = file.getAbsolutePath();
                 listener.getLogger().println("Results Dir: " + startDir);
-                passed &= parser.parseResult(action, startDir, build.getUrl(),scripts[j],sut);
-                j++;
+
+                String scriptName = file.getName();   //same as the directory name
+                listener.getLogger().println("Script name: " + scriptName);
+
+                passed &= parser.parseResult(action, startDir, build.getUrl(),scriptName,sut);
             }
         }
 
