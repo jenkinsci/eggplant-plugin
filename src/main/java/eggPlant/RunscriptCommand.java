@@ -42,9 +42,9 @@ public class RunscriptCommand {
         String [] scriptArray = scriptList.split(",");
         
         for (int i = 0; i < scriptArray.length; i++){
-                scripts += " "+build.getWorkspace()
+                scripts += "\""+build.getWorkspace()
                         +File.separator
-                        +scriptArray[i].trim();  
+                        +scriptArray[i].trim()+"\" ";  
         }
         
         runscriptCommandString =  runscript+" "+scripts;
@@ -92,7 +92,7 @@ public class RunscriptCommand {
     }
 
     public void setDefaultDocumentDirectory(String defaultDocumentDirectory) {
-        this.defaultDocumentDirectory = defaultDocumentDirectory;
+        this.defaultDocumentDirectory = "\""+defaultDocumentDirectory+"\"";
     }
 
     public String getGlobalResultsFolder() {
@@ -100,7 +100,7 @@ public class RunscriptCommand {
     }
 
     public void setGlobalResultsFolder(String globalResultsFolder) {
-        this.globalResultsFolder = globalResultsFolder;
+        this.globalResultsFolder = "\""+globalResultsFolder+"\"";
     }
 
     public String getHost() {
