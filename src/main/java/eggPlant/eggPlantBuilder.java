@@ -73,8 +73,13 @@ public class eggPlantBuilder extends Builder {
      */
     public static String defaultCLI() {
         String operatingSystem = System.getProperty("os.name");
+        
         if (operatingSystem.startsWith("Windows")) {
-            return "C:\\Program Files\\Eggplant\\runscript.bat";
+            if (System.getenv("ProgramFiles(x86)") != null) {
+                return "C:\\Program Files (x86)\\Eggplant\\runscript.bat";
+            } else {
+                return "C:\\Program Files\\Eggplant\\runscript.bat";
+            }
         } else if (operatingSystem.startsWith("Mac")) {
             return "/Applications/Eggplant.app/runscript";
         } else {
