@@ -1,59 +1,58 @@
 package eggPlant;
 
-import hudson.Launcher;
 import hudson.Extension;
+import hudson.Launcher;
+import hudson.Launcher.ProcStarter;
 import hudson.Util;
-import hudson.util.FormValidation;
+import hudson.util.ArgumentListBuilder;
 import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
 import hudson.model.AbstractProject;
-import hudson.tasks.Builder;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.Proc;
+import hudson.model.Computer;
+import hudson.model.Node;
 import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.Builder;
+import hudson.util.FormValidation;
+import java.io.*;
+import java.util.ArrayList;
+import javax.servlet.ServletException;
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.QueryParameter;
-
-import hudson.model.Result;
-import java.io.DataInputStream;
-import java.io.File;
-import javax.servlet.ServletException;
-import java.io.IOException;
-
+import org.kohsuke.stapler.StaplerRequest;
 
 public class eggPlantBuilder extends Builder {
-
 
     private final String script;
     private final String sut;
     private final String port;
     private final String password;
     private final String colorDepth;
-
     private final String globalResultsFolder;
     private final String defaultDocumentDirectory;
     private final String params;
     private final boolean reportFailures;
     private final boolean commandLineOutput;
-
     //operating system... it appears that Jenkins on Mac/Linux doesn't like quotes in the command
     private String operatingSystem;
     private String[] scripts;
     private String commandLine; //location of runscript
 
-
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public eggPlantBuilder(String script,
-                           String SUT,
-                           String port,
-                           String password,
-                           String colorDepth,
-                           String globalResultsFolder,
-                           String defaultDocumentDirectory,
-                           String params,
-                           boolean reportFailures,
-                           boolean commandLineOutput) {
+            String SUT,
+            String port,
+            String password,
+            String colorDepth,
+            String globalResultsFolder,
+            String defaultDocumentDirectory,
+            String params,
+            boolean reportFailures,
+            boolean commandLineOutput) {
 
         this.script = script;
         this.sut = SUT;
@@ -73,7 +72,7 @@ public class eggPlantBuilder extends Builder {
      */
     public static String defaultCLI() {
         String operatingSystem = System.getProperty("os.name");
-        
+
         if (operatingSystem.startsWith("Windows")) {
             if (System.getenv("ProgramFiles(x86)") != null) {
                 return "C:\\Program Files (x86)\\Eggplant\\runscript.bat";
@@ -130,8 +129,7 @@ public class eggPlantBuilder extends Builder {
     }
 
     //ajf 10/26/11 added getter for default doc dir
-
-    public String getDefaultDocumentDirectory(){
+    public String getDefaultDocumentDirectory() {
         return defaultDocumentDirectory;
     }
 
@@ -157,9 +155,9 @@ public class eggPlantBuilder extends Builder {
     }
 
     /**
-     * This is where you 'build' the project. 
-     * This runs eggPlant from the command line and then reads in the results
-     * so that Jenkins can display them
+     * This is where you 'build' the project. This runs eggPlant from the
+     * command line and then reads in the results so that Jenkins can display
+     * them
      *
      * @param build
      * @param launcher
@@ -173,7 +171,7 @@ public class eggPlantBuilder extends Builder {
 
         //ajf 04/18/2012: pull runscript from the global store or use the default.
 
-        if (getDescriptor().getCommandLine() == null || getDescriptor().getCommandLine().isEmpty() ){
+        if (getDescriptor().getCommandLine() == null || getDescriptor().getCommandLine().isEmpty()) {
             this.commandLine = defaultCLI();
         } else {
             this.commandLine = getDescriptor().getCommandLine();
@@ -188,7 +186,7 @@ public class eggPlantBuilder extends Builder {
         try {
 
             //Construct the command line execution
-            RunscriptCommand runner = new RunscriptCommand(build,commandLine,script);
+            RunscriptCommand runner = new RunscriptCommand(build, commandLine, script);
 
             //Step 1: path to runscript--handled by the RunscriptCommand Object
             listener.getLogger().println("Command Step 1 - Runscript Location: " + runner.getRunscript());
@@ -198,14 +196,28 @@ public class eggPlantBuilder extends Builder {
 
 
             //Step 3: other command line flags
-            if (!sut.isEmpty())      runner.setHost(getResolvedString(sut, build, listener));
-            if (!port.isEmpty())     runner.setPort(Integer.parseInt(port));
-            if (!password.isEmpty()) runner.setPassword(getResolvedString(password, build, listener));
-            if (!colorDepth.isEmpty()) runner.setColorDepth(Integer.parseInt(getResolvedString(colorDepth, build, listener)));
+            if (!sut.isEmpty()) {
+                runner.setHost(getResolvedString(sut, build, listener));
+            }
+            if (!port.isEmpty()) {
+                runner.setPort(Integer.parseInt(port));
+            }
+            if (!password.isEmpty()) {
+                runner.setPassword(getResolvedString(password, build, listener));
+            }
+            if (!colorDepth.isEmpty()) {
+                runner.setColorDepth(Integer.parseInt(getResolvedString(colorDepth, build, listener)));
+            }
 
-            if (reportFailures) runner.setReportFailures(reportFailures);
-            if (commandLineOutput) runner.setCommandLineOutput(commandLineOutput);
-            if (!params.isEmpty()) runner.setParams(params);
+            if (reportFailures) {
+                runner.setReportFailures(reportFailures);
+            }
+            if (commandLineOutput) {
+                runner.setCommandLineOutput(commandLineOutput);
+            }
+            if (!params.isEmpty()) {
+                runner.setParams(params);
+            }
 
             if (defaultDocumentDirectory.isEmpty()) {
                 runner.setDefaultDocumentDirectory(build.getWorkspace().toString());
@@ -214,49 +226,129 @@ public class eggPlantBuilder extends Builder {
                 runner.setDefaultDocumentDirectory(getResolvedString(defaultDocumentDirectory, build, listener));
             }
 
-            if (globalResultsFolder.isEmpty()){
+            if (globalResultsFolder.isEmpty()) {
                 runner.setGlobalResultsFolder(build.getRootDir().getAbsolutePath());
-            }
-            else {
+            } else {
                 runner.setGlobalResultsFolder(getResolvedString(globalResultsFolder, build, listener));
             }
 
             listener.getLogger().println("Command Step 3 - Other Command Line Flags,"
-                    +"Host: "+runner.getHost()
-                    +", Port: "+runner.getPort()
-                    +", Password: "+runner.getPassword()
-                    +", Color Depth: "+runner.getColorDepth()
-                    +", Global Results Folder: "+runner.getGlobalResultsFolder()
-                    +", Default Document Directory: "+runner.getDefaultDocumentDirectory());
+                    + "Host: " + runner.getHost()
+                    + ", Port: " + runner.getPort()
+                    + ", Password: " + runner.getPassword()
+                    + ", Color Depth: " + runner.getColorDepth()
+                    + ", Global Results Folder: " + runner.getGlobalResultsFolder()
+                    + ", Default Document Directory: " + runner.getDefaultDocumentDirectory());
 
             //step 4: put the runscript command together
             runner.buildRunscriptCommandString();
 
             listener.getLogger().println("Fully Constructed Runscript Command: "
-                    +runner.getRunScriptCommandString());
+                    + runner.getRunScriptCommandString());
 
             //  runner object will be run from the command line
-            listener.getLogger().println("Now Executing" +
-                    runner.getRunScriptCommandString()+"...");
-
+            listener.getLogger().println("Now Executing "
+                    + runner.getRunScriptCommandString() + "...");
+            //try {
             //JN: executes ONLY on the same machine as Jenkins
-            Process ls_proc = Runtime.getRuntime().exec(runner.getRunScriptCommandString());
+            //Process ls_proc = Runtime.getRuntime().exec(runner.getRunscriptCommandArray());
+
+//                String[] cmdArray = new String[]{runner.getRunscript(), runner.getScripts(), "-host", runner.getHost(), 
+//                    "-port", Integer.toString(runner.getPort()), "-password", runner.getPassword(), "-colorDepth", 
+//                    Integer.toString(runner.getColorDepth()), "-GlobalResultsFolder", runner.getGlobalResultsFolder(),
+//                    "-DefaultDocumentDirectory", runner.getDefaultDocumentDirectory(), "-params", runner.getParams()};
+//                
+//                ArrayList<String> cmdList = new ArrayList<String>();
+//                
+//                
+//                
+//                for (int i = 0; i < cmdArray.length; i++) {
+//                    if (cmdArray[i] != null) {
+//                        cmdList.add(cmdArray[i]);
+//                    }
+//                }
+//    
+//                
+//                listener.getLogger().println("cmdList size: " + cmdList.size());
+//                
+//                for (int i = 0; i < cmdList.size(); i++) {
+//                    listener.getLogger().println("cmdList: " + cmdList.get(i));
+//                }
+
+
+            // build the command arraylist
+            runner.buildRunscriptCommandList();
+            ArrayList<String> cmdList = runner.getRunscriptCommandList();
+
+            // print the command arraylist
+            //for (int i = 0; i < cmdList.size(); i++) {
+            //    listener.getLogger().println("cmdList: " + cmdList.get(i));
+            //}
+
+            // convert the arraylist to an array and execute
+            //String[] execArray = new String[cmdList.size()];
+            //execArray = cmdList.toArray(execArray);
+            //Process ls_proc = Runtime.getRuntime().exec(execArray);
+
+            // int exitVal = ls_proc.waitFor();
+            // listener.getLogger().println("Process exitValue: " + exitVal);
 
             //  TODO: Distributed executions
             //Something like this will run on a distributed machine
-            //launcher.launch().cmds(runner).stdout(listener.getLogger());  
-            //.envs(build.getEnvironment(listener)).stdout(listener.getLogger()).pwd(build.getWorkspace()).join();
-
-            // get its output (your input) stream 
-            DataInputStream ls_in = new DataInputStream(ls_proc.getInputStream());
-
+            //launcher.launch().cmds(runner).stdout(listener.getLogger()).envs(build.getEnvironment(listener)).stdout(listener.getLogger()).pwd(build.getWorkspace()).join();
             try {
-                while ((ls_str = ls_in.readLine()) != null) {
-                    listener.getLogger().println(ls_str);
+                
+//                Node node = build.getBuiltOn();
+//                listener.getLogger().print(node.toComputer().);
+                
+                int returnVal = launcher.launch().cmds(cmdList).stdout(listener).join();
+
+//                ArgumentListBuilder command = new ArgumentListBuilder();
+//                command.add(cmdList);
+//                ProcStarter ps = launcher.new ProcStarter();                
+//                ps = ps.cmds(command).stdout(listener);
+//                ps = ps.pwd(build.getWorkspace()).envs(build.getEnvironment(listener));
+//                Proc proc = launcher.launch(ps);
+//                int returnVal = proc.join();
+                
+                if (returnVal != 0) {
+                    listener.finished(Result.FAILURE);
+
                 }
-            } catch (Exception e) {
-                build.setResult(Result.UNSTABLE);
-                listener.getLogger().println("Exception: " + e.getMessage());
+
+                // ryan 12/14
+                // InputStream stderr = ls_proc.getErrorStream();
+                // InputStreamReader isr = new InputStreamReader(stderr);
+                //  BufferedReader br = new BufferedReader(isr);
+                // ryan
+
+
+                // get its output (your input) stream 
+                // old stuff
+                //InputStream ls_in = new InputStream(ls_proc.getInputStream());
+
+                //String line = null;
+                // was ls_in.readline before
+                //try {
+//                while ((line = br.readLine()) != null) {
+//                     listener.getLogger().println(line);
+//                }
+
+                // ryan 12/14
+//                int exitVal = ls_proc.waitFor();
+//                listener.getLogger().println("Process exitValue: " + exitVal);
+                // ryan
+
+            } catch (IOException ioe) {
+                ioe.printStackTrace(listener.fatalError("Execution: " + cmdList + "failed"));
+                listener.finished(Result.FAILURE);
+                listener.getLogger().println("Exception: " + ioe.getMessage());
+
+            } catch (InterruptedException ie) {
+                ie.printStackTrace(listener.fatalError("Execution" + cmdList + "failed"));
+                listener.finished(Result.FAILURE);
+                listener.getLogger().println("Exception: " + ie.getMessage());
+
             }
         } catch (Exception e) {
             listener.getLogger().println("Exception: " + e.getMessage());
@@ -280,12 +372,10 @@ public class eggPlantBuilder extends Builder {
         boolean passed = true;
 
         //  Loop round all the files
-        for (int i = 0; i < files.length; i++)
-        {
+        for (int i = 0; i < files.length; i++) {
             File file = files[i];
             //  Only interested in directories
-            if (file.isDirectory())
-            {
+            if (file.isDirectory()) {
                 //  Read the results out of the directory
                 //  If there is no RunHistory.csv
                 //  then nothing will be logged
@@ -295,7 +385,7 @@ public class eggPlantBuilder extends Builder {
                 String scriptName = file.getName();   //same as the directory name
                 listener.getLogger().println("Script name: " + scriptName);
 
-                passed &= parser.parseResult(action, startDir, build.getUrl(),scriptName,sut);
+                passed &= parser.parseResult(action, startDir, build.getUrl(), scriptName, sut);
             }
         }
 
@@ -307,10 +397,9 @@ public class eggPlantBuilder extends Builder {
     }
 
     /**
-     * Descriptor for {@link eggPlantBuilder}. Used as a singleton.
-     * The class is marked as public so that it can be accessed from views.
+     * Descriptor for {@link eggPlantBuilder}. Used as a singleton. The class is
+     * marked as public so that it can be accessed from views.
      */
-
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
@@ -320,21 +409,20 @@ public class eggPlantBuilder extends Builder {
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
         /**
-         * To persist global configuration information,
-         * simply store it in a field and call save().
+         * To persist global configuration information, simply store it in a
+         * field and call save().
          *
-         * <p>
-         * If you don't want fields to be persisted, use <tt>transient</tt>.
+         * <p> If you don't want fields to be persisted, use <tt>transient</tt>.
          */
         private String commandLine;
 
         /**
          * Performs on-the-fly validation of the form field 'name'.
          *
-         * @param value
-         *      This parameter receives the value that the user has typed.
-         * @return
-         *      Indicates the outcome of the validation. This is sent to the browser.
+         * @param value This parameter receives the value that the user has
+         * typed.
+         * @return Indicates the outcome of the validation. This is sent to the
+         * browser.
          */
         public FormValidation doCheckCommandLine(@QueryParameter String value)
                 throws IOException, ServletException {
@@ -344,12 +432,12 @@ public class eggPlantBuilder extends Builder {
 
             return FormValidation.ok();
         }
+
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             // Indicates that this builder can be used with all kinds of project types 
             return true;
         }
-
 
         @Override
         public String getDisplayName() {
@@ -365,7 +453,7 @@ public class eggPlantBuilder extends Builder {
             return super.configure(req, formData);
         }
 
-        public String getCommandLine(){
+        public String getCommandLine() {
             return commandLine;
         }
 
