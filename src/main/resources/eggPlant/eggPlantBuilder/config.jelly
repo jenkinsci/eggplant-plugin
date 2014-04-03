@@ -1,23 +1,31 @@
 <!--This file controls the display/getting data of the build step.-->
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  
+
+    <f:entry title="EggPlant Installation">
+        <select class="setting-input" name="installationName">
+            <j:forEach var="inst" items="${descriptor.installations}">
+                <f:option selected="${inst.name==instance.installationName}">${inst.name}</f:option>
+            </j:forEach>
+        </select>
+    </f:entry>
+
   <f:entry title="Script" field="script">
     <f:textbox name="script" value="${instance.script}"/>
   </f:entry>
-  
+
   <f:entry title="SUT" field="SUT">
     <f:textbox name="SUT" value="${instance.SUT}" />
   </f:entry>
-  
+
   <f:entry title="Port" field="port">
     <f:textbox name="port" value="${instance.port}" default="5900" />
   </f:entry>
-  
+
   <f:entry title="Password" field="password">
     <f:textbox name="password" value="${instance.password}" />
   </f:entry>
-  
+
   <!--advanced options-->
       <f:advanced>
         <f:section title="Advanced eggPlant Settings">
@@ -46,5 +54,5 @@
           </f:entry>
         </f:section>
        </f:advanced>
-       
+
 </j:jelly>

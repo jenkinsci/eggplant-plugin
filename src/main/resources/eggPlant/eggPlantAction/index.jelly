@@ -8,10 +8,12 @@
     <l:main-panel>
       <h1>eggPlant Results</h1>
 
-      <j:forEach var="result" items="${it.resultList}">
-        <table class="pane" >
+      <j:forEach var="result" items="${it.resultList}" varStatus="status">
+        <a name="${status.count}"><st:nbsp/></a>
+        <p><st:nbsp/><st:nbsp/></p>
+        <table class="pane" width="100%">
           <tr>
-            <td class="pane-header">Outcome</td>
+              <td class="pane-header">Outcome</td>
             <td class="pane">
               <j:if test="${result.passed}">
                 <span class="result-passed">Passed</span>
@@ -51,7 +53,7 @@
           </tr>
         </table>
 
-        <table class="pane">
+        <table class="pane" width="100%">
           <tr>
             <td class="pane-header">Step</td>
             <td class="pane-header">Time</td>
@@ -61,12 +63,12 @@
           </tr>
           <j:forEach var="scriptline" items="${result.scriptLines}">
             <tr>
-              <td class="pane">${scriptline.step}</td>
-              <td class="pane">${scriptline.time}</td>
-              <td class="pane">${scriptline.message}</td>
-<!--          <td class="pane"><a href="${scriptline.imageURL}">${scriptline.image}</a></td>  -->
-              <td class="pane">${scriptline.image}</td>
-              <td class="pane">${scriptline.text}</td>
+              <td class="pane" style="vertical-align:text-top;">${scriptline.step}</td>
+              <td class="pane" style="vertical-align:text-top;">${scriptline.time}</td>
+              <td class="pane" style="vertical-align:text-top;">${scriptline.message}</td>
+<!--          <td class="pane" style="vertical-align:text-top;"><a href="${scriptline.imageURL}">${scriptline.image}</a></td>  -->
+              <td class="pane" style="vertical-align:text-top;white-space: normal;">${scriptline.image}</td>
+              <td class="pane" style="vertical-align:text-top;white-space: normal;">${scriptline.text}</td>
             </tr>
           </j:forEach>
         </table>

@@ -76,9 +76,6 @@ public class eggPlantBuilder extends Builder {
     public boolean getCommandLineOutput() {
         return commandLineOutput;
     }
-    public boolean getReportFailures() {
-        return reportFailures;
-    }
 
     public String getDefaultDocumentDirectory ()
     {
@@ -87,14 +84,6 @@ public class eggPlantBuilder extends Builder {
 
     public String getInstallationName() {
         return installationName;
-    }
-
-    public String getGlobalResultsFolder() {
-        return globalResultsFolder;
-    }
-
-    public String getParams() {
-        return params;
     }
 
 

@@ -1,35 +1,44 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package eggPlant;
 
 import au.com.bytecode.opencsv.CSVReader;
+import hudson.FilePath;
+import hudson.remoting.VirtualChannel;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- *
- * @author afisher
- */
-public class EggplantParser {
-    
+public final class EggplantParser  implements FilePath.FileCallable<List<eggPlantResult>>
+{
+    private final String sut;
+    private final String url;
 
-    public EggplantParser() {
-        
+    public EggplantParser(String sut, String url)
+    {
+        this.sut = sut;
+        this.url = url;
     }
-    /**
-     * Converts the result files for eggPlant into Jenkins format so that it
-     * can be display in Jenkins
-     * 
-     * @param action    action in which to store the results
-     * @param startDir  Job directory where eggPlant was told to put the results
-     * @param url       URL for the screenshots TODO: Not working
-     * @return 
-     */
-     boolean parseResult(eggPlantAction action, String startDir, String url, String scriptName, String sut) {
 
-        boolean passed = true;
+    @Override
+    public ArrayList<eggPlantResult> invoke(File f, VirtualChannel channel)
+    {
+        ArrayList<eggPlantResult> results = new ArrayList<eggPlantResult>();
+        FileReader fr = null;
+        CSVReader reader = null;
+        try
+        {
+            fr = new FileReader(f);
+            reader = new CSVReader(fr);
 
-        try {
-            // RunHistory.csv contains the high level results and the filename of the 
-            // result lines
-            CSVReader reader = new CSVReader(new FileReader(startDir + "/RunHistory.csv"));
+            // skip the header row
             String[] line = reader.readNext();
 
             // Loop round reading each line
@@ -41,35 +50,58 @@ public class EggplantParser {
                 result.setErrors(line[3]);
                 result.setWarnings(line[4]);
                 result.setExceptions(line[5]);
-                result.setScript(scriptName);
+                result.setScript(f.getParent());
                 result.setSut(sut);
-                
-                passed = passed & line[1].equals("Success");
 
-                getResultLines(result, startDir + "/" + line[6], url);
+                getResultLines(result, f.getParent() + "/" + line[6], url);
 
-                action.getResultList().add(result);
+                results.add(result);
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(eggPlantBuilder.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(eggPlantBuilder.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        return passed;
+        finally
+        {
+            if (reader != null)
+            {
+                try {
+                    reader.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(EggplantParser.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (fr != null)
+            {
+                try {
+                    fr.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(EggplantParser.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return results;
     }
-
     /**
      * Reads the individual result lines from an eggPlant results file
-     * 
+     *
      * @param result    parent of the result line
      * @param file      file containing the result lines
      * @param url       url to where images will be stored TODO: Not working
      */
-    private void getResultLines(eggPlantResult result, String file, String url) {
+    private void getResultLines(eggPlantResult result, String file, String url)
+    {
+        FileReader fr = null;
+        CSVReader reader = null;
+
         try {
             // These files are tab separated
-            CSVReader reader = new CSVReader(new FileReader(file), '\t');
-            String[] line = reader.readNext();
+            fr = new FileReader(file);
+            reader = new CSVReader(fr, '\t');
+            // skip the header row
+            String[] line = reader.readNext(); // throw away the header line
 
             int step = 1;
             // Loop round reading each line
@@ -88,8 +120,23 @@ public class EggplantParser {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        finally{
+            if (reader != null)
+            {
+                try {
+                    reader.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(EggplantParser.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (fr != null)
+            {
+                try {
+                    fr.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(EggplantParser.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
     }
-    
-    
 }
