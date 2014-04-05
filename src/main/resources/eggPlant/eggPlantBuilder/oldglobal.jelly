@@ -1,0 +1,12 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:section title="eggPlant">
+        <f:entry title="Runscript Location"
+             description="This specifies the location of runscript, eggPlant's
+                command line interface. This is the same as executing an eggPlant
+                script from the command line.
+                Windows - C:\Program Files\Eggplant\runscript.bat
+                Macintosh - /Applications/Eggplant.app/runscript Linux - runscript">
+            <f:textbox name="commandLine" value="${instance.commandLine}" />
+        </f:entry>
+    </f:section>
+</j:jelly>
