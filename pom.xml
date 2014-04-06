@@ -14,8 +14,8 @@
   <url>http://wiki.jenkins-ci.org/display/JENKINS/eggplant-plugin</url>
 
   <scm>
-    <connection>scm:git:ssh://github.com/jenkinsci/eggplant-plugin.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/eggplant-plugin.git</developerConnection>
+    <connection>scm:git:https://github.com/jenkinsci/eggplant-plugin.git</connection>
+    <developerConnection>scm:git:https://git@github.com/jenkinsci/eggplant-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/eggplant-plugin</url>
   </scm>
 
