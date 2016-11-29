@@ -1,5 +1,12 @@
 package eggPlant;
 
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.List;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
+
 import hudson.CopyOnWrite;
 import hudson.Extension;
 import hudson.FilePath;
@@ -12,12 +19,8 @@ import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.ArgumentListBuilder;
-import java.io.*;
-import java.util.List;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
 
 public class eggPlantBuilder extends Builder {
 
@@ -31,7 +34,7 @@ public class eggPlantBuilder extends Builder {
     private final String params;
     private final boolean reportFailures;
     private final boolean commandLineOutput;
-    private String installationName;
+    private final String installationName;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
@@ -114,7 +117,7 @@ public class eggPlantBuilder extends Builder {
 
     EggPlantInstallation getInstallation(AbstractBuild<?,?> build, BuildListener listener) throws IOException, InterruptedException
     {
-        for (EggPlantInstallation i : getDescriptor().getInstallations())
+        for (final EggPlantInstallation i : getDescriptor().getInstallations())
         {
             if (installationName != null && installationName.equals(i.getName()))
             {
@@ -138,7 +141,7 @@ public class eggPlantBuilder extends Builder {
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException
     {
         //  Start logging - this will appear in the console output
-        PrintStream log = listener.getLogger();
+        final PrintStream log = listener.getLogger();
 
         if (script == null || Util.fixEmptyAndTrim(script) == null)
         {
@@ -148,27 +151,27 @@ public class eggPlantBuilder extends Builder {
 
         log.println("eggPlant execution started");
 
-        EggPlantInstallation installation = getInstallation(build, listener);
+        final EggPlantInstallation installation = getInstallation(build, listener);
         if (installation == null)
         {
              log.println("eggPlant installation not found for this node.");
              return false;
         }
 
-        String commandLine = installation.getHome();
+        final String commandLine = installation.getHome();
         if (commandLine == null || commandLine.isEmpty()) {
              log.println("eggPlant runtime not defined.");
              return false;
         }
 
-        ArgumentListBuilder args = new ArgumentListBuilder();
+        final ArgumentListBuilder args = new ArgumentListBuilder();
         args.add(installation.getHome());
 
         try {
             prepArgs(args, build, listener);
 
             // run script
-            int returnVal = launcher.launch()
+            final int returnVal = launcher.launch()
                     .cmds(args)
                     .stdout(listener)
                     .pwd(build.getModuleRoot())
@@ -190,16 +193,16 @@ public class eggPlantBuilder extends Builder {
                 build.addAction(action);
             }
 
-            FilePath [] results = build.getWorkspace().list("**/RunHistory.csv");
+            final FilePath [] results = build.getWorkspace().list("**/RunHistory.csv");
 
-            for (FilePath fp : results)
+            for (final FilePath fp : results)
             {
                 //  Read the results out of the directory
                 //  If there is no RunHistory.csv, nothing will be logged
 
                 log.println("Parsing results for test: " + fp.getParent().getName());
 
-                List<eggPlantResult> rList = fp.act(new EggplantParser(sut, build.getUrl()));
+                final List<eggPlantResult> rList = fp.act(new EggplantParser(sut, build.getUrl()));
                 action.getResultList().addAll(rList);
             }
 
@@ -207,8 +210,8 @@ public class eggPlantBuilder extends Builder {
             log.println("Finished parsing eggPlant results");
 
             //  Return the result of the eggPlant bit
-            List<eggPlantResult> resultsList=  action.getResultList();
-            for (eggPlantResult result: resultsList)
+            final List<eggPlantResult> resultsList=  action.getResultList();
+            for (final eggPlantResult result: resultsList)
             {
                 if (!result.isPassed())
                 {
@@ -218,10 +221,10 @@ public class eggPlantBuilder extends Builder {
 
             return true;
 
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             log.println(ex.getMessage());
             return false;
-        } catch (InterruptedException ex) {
+        } catch (final InterruptedException ex) {
             log.println(ex.getMessage());
             return false;
         }
@@ -231,25 +234,25 @@ public class eggPlantBuilder extends Builder {
     {
         if (script.indexOf(',') > 0)
         {
-            String [] scriptArray = script.split(",");
-            for (String scr: scriptArray)
+            final String [] scriptArray = script.split(",");
+            for (final String scr: scriptArray)
             {
-                args.add(scr);
+                args.add(getResolvedString(scr, build, listener));
             }
         }
         else
         {
-            args.addTokenized(script);
+            args.addTokenized(getResolvedString(script, build, listener));
         }
 
         if (!sut.isEmpty()) {
             args.add("-host");
-            args.add(sut);
+            args.add(getResolvedString(sut, build, listener));
         }
 
         if (!port.isEmpty()) {
             args.add("-port");
-            args.add(port);
+            args.add(getResolvedString(port, build, listener));
         }
         if (!password.isEmpty()) {
             args.add("-password");
@@ -271,14 +274,14 @@ public class eggPlantBuilder extends Builder {
         if (!params.isEmpty()) {
             if (params.indexOf(',') > 0)
             {
-                String[] parameters = params.split(",");
+                final String[] parameters = params.split(",");
                 for (int i = 0; i < parameters.length; i++) {
-                    args.add(parameters[i]);
+                    args.add(getResolvedString(parameters[i], build, listener));
                 }
             }
             else
             {
-                args.addTokenized(params);
+                args.addTokenized(getResolvedString(params, build, listener));
             }
         }
 
